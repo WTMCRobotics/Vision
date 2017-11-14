@@ -6,6 +6,9 @@
 #include <LiveWindow/LiveWindow.h>
 #include <SmartDashboard/SendableChooser.h>
 #include <SmartDashboard/SmartDashboard.h>
+#include <vision/VisionPipeline.h>
+#include <CameraServer.h>
+#include "Grip.h"
 
 #include <XboxController.h>
 #include <TankDrive.h>
@@ -16,6 +19,10 @@ public:
 		chooser.AddDefault(autoNameDefault, autoNameDefault);
 		chooser.AddObject(autoNameCustom, autoNameCustom);
 		frc::SmartDashboard::PutData("Auto Modes", &chooser);
+
+		camera = frc::CameraServer::GetInstance()->StartAutomaticCapture("Camera", 0);
+		outputSource = frc::CameraServer::GetInstance()->PutVideo("video", 640, 480);
+		cvSink = frc::CameraServer::GetInstance()->GetVideo();
 
 		leftStick = 0;
 		rightStick = 0;
@@ -45,11 +52,7 @@ public:
 	}
 
 	void AutonomousPeriodic() {
-		if (autoSelected == autoNameCustom) {
-			// Custom Auto goes here
-		} else {
-			// Default Auto goes here
-		}
+
 	}
 
 	void TeleopInit() {
@@ -58,8 +61,48 @@ public:
 	}
 
 	void TeleopPeriodic() {
-		UpdateControls();
-		drivetrain.Drive(leftStick, rightStick);
+		cvSink.GrabFrame(image);
+		gripObj.process(image);
+
+		contourPointsPtr = gripObj.getfilterContoursOutput();
+		contourPoints = *contourPointsPtr;
+
+		std::cout <<contourPoints.size() << std::endl;
+		if(contourPoints.size() > 0)
+		{
+			rectangle = cv::boundingRect(contourPoints[0]);
+
+			largestArea = rectangle.area();
+			largestIndex = 0;
+			for (unsigned int i = 1; i < contourPoints.size(); i++)
+			{
+				std::cout<<"yes\n";
+				rectangle = cv::boundingRect(contourPoints[i]);
+				contourArea = rectangle.area();
+				if(contourArea > largestArea)
+				{
+					largestArea = contourArea;
+					largestIndex = i;
+				}
+			}
+			rectangle = cv::boundingRect(contourPoints[largestIndex]);
+			centerX = rectangle.x + (rectangle.width / 2);
+			centerY = rectangle.y + (rectangle.height / 2);
+
+			frc::SmartDashboard::PutNumber("Center X", centerX);
+			frc::SmartDashboard::PutNumber("Center Y", centerY);
+			cv::drawContours(image, contourPoints, largestIndex, cv::Scalar(255,0,0), 3);
+			cv::drawMarker(image, cv::Point2i(centerX,centerY), cv::Scalar(255,0,0), cv::MARKER_CROSS);
+			outputSource.PutFrame(image);
+		}
+		else
+		{
+			frc::SmartDashboard::PutNumber("Center X", -1);
+			frc::SmartDashboard::PutNumber("Center Y", -1);
+		}
+
+		//UpdateControls();
+		//drivetrain.Drive(leftStick, rightStick);
 	}
 
 	void TestPeriodic() {
@@ -76,8 +119,24 @@ private:
 	double leftStick;
 	double rightStick;
 
+	cs::UsbCamera camera;
+	cs::CvSink cvSink;
+
+	cv::Rect rectangle;
+	std::vector<std::vector<cv::Point>>* contourPointsPtr;
+	std::vector<std::vector<cv::Point>> contourPoints;
+	std::vector<cv::Point> centers;
+	cv::Mat image;
+	cs::CvSource outputSource;
+	grip::Grip gripObj;
+	int contourArea;
+	int largestIndex;
+	int largestArea;
+	int centerX;
+	int centerY;
+
 	frc::XboxController xbox{0};
-	TankDrive drivetrain{};
+	TankDrive drivetrain;
 
 
 	void UpdateControls()
