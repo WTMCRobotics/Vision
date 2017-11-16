@@ -12,13 +12,16 @@
 #include <XboxController.h>
 #include <math.h>
 #include <GlobalVariables.h>
+#include <CameraServer.h>
 
 class TankDrive
 {
+
 	public:
 		TankDrive();
 		void Stop();
 		void Drive(double left, double right);
+		void DriveVision(double xCenter, double yCenter, double width);
 	private:
 		CANTalon leftMaster {LEFT_MASTER};
 		CANTalon leftSlave {LEFT_SLAVE};

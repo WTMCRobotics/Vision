@@ -52,7 +52,47 @@ public:
 	}
 
 	void AutonomousPeriodic() {
+		cvSink.GrabFrame(image);
+		gripObj.process(image);
 
+		contourPointsPtr = gripObj.getfilterContoursOutput();
+		contourPoints = *contourPointsPtr;
+
+		std::cout <<contourPoints.size() << std::endl;
+		if(contourPoints.size() > 0)
+		{
+			rectangle = cv::boundingRect(contourPoints[0]);
+
+			largestArea = rectangle.area();
+			largestIndex = 0;
+			for (unsigned int i = 1; i < contourPoints.size(); i++)
+			{
+				std::cout<<"yes\n";
+				rectangle = cv::boundingRect(contourPoints[i]);
+				contourArea = rectangle.area();
+				if(contourArea > largestArea)
+				{
+					largestArea = contourArea;
+					largestIndex = i;
+				}
+			}
+			rectangle = cv::boundingRect(contourPoints[largestIndex]);
+			centerX = rectangle.x + (rectangle.width / 2);
+			centerY = rectangle.y + (rectangle.height / 2);
+
+			frc::SmartDashboard::PutNumber("Center X", centerX);
+			frc::SmartDashboard::PutNumber("Center Y", centerY);
+			cv::drawContours(image, contourPoints, largestIndex, cv::Scalar(255,0,0), 2);
+			cv::drawMarker(image, cv::Point2i(centerX,centerY), cv::Scalar(255,0,0), cv::MARKER_DIAMOND, 2);
+			cv::drawMarker(image, cv::Point2i(image.size().width/2, image.size().height/2), cv::Scalar(0,255,0), cv::MARKER_STAR, 2);
+			outputSource.PutFrame(image);
+		}
+		else
+		{
+			frc::SmartDashboard::PutNumber("Center X", -1);
+			frc::SmartDashboard::PutNumber("Center Y", -1);
+		}
+		drivetrain.DriveVision(centerX, centerY, image.size().width);
 	}
 
 	void TeleopInit() {
@@ -91,8 +131,9 @@ public:
 
 			frc::SmartDashboard::PutNumber("Center X", centerX);
 			frc::SmartDashboard::PutNumber("Center Y", centerY);
-			cv::drawContours(image, contourPoints, largestIndex, cv::Scalar(255,0,0), 3);
-			cv::drawMarker(image, cv::Point2i(centerX,centerY), cv::Scalar(255,0,0), cv::MARKER_CROSS);
+			cv::drawContours(image, contourPoints, largestIndex, cv::Scalar(255,0,0), 2);
+			cv::drawMarker(image, cv::Point2i(centerX,centerY), cv::Scalar(255,0,0), cv::MARKER_DIAMOND, 2);
+			cv::drawMarker(image, cv::Point2i(image.size().width/2, image.size().height/2), cv::Scalar(0,255,0), cv::MARKER_STAR, 2);
 			outputSource.PutFrame(image);
 		}
 		else

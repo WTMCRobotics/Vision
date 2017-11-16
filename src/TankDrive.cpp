@@ -42,11 +42,37 @@ void TankDrive::Stop()
 	rightMaster.Set(0);
 }
 
+void TankDrive::DriveVision(double xCenter, double yCenter, double width)
+{
+	if(xCenter == width / 2)
+	{
+		leftMaster.Set(.1 * MAX_SPEED);
+		rightMaster.Set(.1 * MAX_SPEED);
+	}
+	else if(xCenter > width / 2)
+	{
+		leftMaster.Set(.1 * MAX_SPEED);
+		rightMaster.Set(-.05 * MAX_SPEED);
+	}
+	else if(xCenter < width / 2)
+	{
+		leftMaster.Set(.05 * MAX_SPEED);
+		rightMaster.Set(-.1 * MAX_SPEED);
+	}
+	else
+	{
+		Stop();
+	}
+}
+
 void TankDrive::Drive(double left, double right)
 {
-	left2 = (abs(left) > DEADBAND) ? left * MAX_SPEED : 0;
-	right2 = (abs(right) > DEADBAND) ? right * MAX_SPEED : 0;
+	left2 = (fabs(left) > DEADBAND) ? left * MAX_SPEED : 0;
+	right2 = (fabs(right) > DEADBAND) ? right * MAX_SPEED : 0;
 
-	leftMaster.Set(-left2);
-	rightMaster.Set(right2);
+	leftMaster.Set(left2);
+	rightMaster.Set(-right2);
+
+	frc::SmartDashboard::PutNumber("Left", left);
+	frc::SmartDashboard::PutNumber("Right", right);
 }

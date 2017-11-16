@@ -13,7 +13,7 @@
 #define RIGHT_SLAVE		3
 #define RIGHT_MASTER 	4
 
-#define DEADBAND		.05
-#define MAX_SPEED 		1024
+#define DEADBAND		.3
+#define MAX_SPEED 		1024 * .5
 
 #endif /* SRC_GLOBALVARIABLES_H_ */
