@@ -166,7 +166,6 @@ private:
 	cv::Rect rectangle;
 	std::vector<std::vector<cv::Point>>* contourPointsPtr;
 	std::vector<std::vector<cv::Point>> contourPoints;
-	std::vector<cv::Point> centers;
 	cv::Mat image;
 	cs::CvSource outputSource;
 	grip::Grip gripObj;
