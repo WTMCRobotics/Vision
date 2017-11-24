@@ -44,7 +44,11 @@ void TankDrive::Stop()
 
 void TankDrive::DriveVision(double xCenter, double yCenter, double width)
 {
-	if(xCenter == width / 2)
+	if (xCenter == -1)
+	{
+		Stop();
+	}
+	else if(xCenter == width / 2)
 	{
 		leftMaster.Set(.1 * MAX_SPEED);
 		rightMaster.Set(.1 * MAX_SPEED);
@@ -58,10 +62,6 @@ void TankDrive::DriveVision(double xCenter, double yCenter, double width)
 	{
 		leftMaster.Set(.05 * MAX_SPEED);
 		rightMaster.Set(-.1 * MAX_SPEED);
-	}
-	else
-	{
-		Stop();
 	}
 }
 
