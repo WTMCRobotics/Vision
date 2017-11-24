@@ -67,7 +67,6 @@ public:
 			largestIndex = 0;
 			for (unsigned int i = 1; i < contourPoints.size(); i++)
 			{
-				std::cout<<"yes\n";
 				rectangle = cv::boundingRect(contourPoints[i]);
 				contourArea = rectangle.area();
 				if(contourArea > largestArea)
@@ -116,7 +115,6 @@ public:
 			largestIndex = 0;
 			for (unsigned int i = 1; i < contourPoints.size(); i++)
 			{
-				std::cout<<"yes\n";
 				rectangle = cv::boundingRect(contourPoints[i]);
 				contourArea = rectangle.area();
 				if(contourArea > largestArea)
