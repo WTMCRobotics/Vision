@@ -90,6 +90,8 @@ public:
 		{
 			frc::SmartDashboard::PutNumber("Center X", -1);
 			frc::SmartDashboard::PutNumber("Center Y", -1);
+			centerX = -1;
+			centerY = -1;
 		}
 		drivetrain.DriveVision(centerX, centerY, image.size().width);
 	}
